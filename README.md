@@ -57,23 +57,7 @@ Generate options:
 
 ## What It Does
 
-```
-~/.claude/projects/*/*.jsonl
-        │
-        ▼
-   ┌─────────┐     ┌───────────┐     ┌────────┐     ┌────────┐
-   │ Discover │ ──▶ │ Parse DAG │ ──▶ │ Compress│ ──▶ │Sanitize│
-   │ Sessions │     │ + Extract │     │ Content │     │Secrets │
-   └─────────┘     └───────────┘     └────────┘     └────────┘
-                                                         │
-                    ┌───────────┐     ┌────────┐         ▼
-                    │  Reduce   │ ◀── │  Map    │ ◀── LLM per
-                    │  Merge    │     │ Analyze │    session
-                    └───────────┘     └────────┘
-                         │
-                         ▼
-                  HTML / Markdown
-```
+![Architecture](assets/arch.svg)
 
 1. **Discover** — Scans `~/.claude/projects/` for sessions matching the target date
 2. **Parse** — Reconstructs the final conversation path from the session DAG (handles branching, compaction, sub-agents)
