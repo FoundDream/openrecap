@@ -7,6 +7,7 @@ import { parseDateOption, discoverSessions } from './session/discover.js';
 import { mapAllSessions } from './analysis/map.js';
 import { reduceAnalyses } from './analysis/reduce.js';
 import { renderHTML } from './render/html.js';
+import { renderMarkdown } from './render/markdown.js';
 import { openInBrowser } from './utils/open.js';
 import { estimateTokens } from './utils/tokens.js';
 import { log, spinner } from './utils/logger.js';
@@ -20,7 +21,7 @@ program
   .description('Review your daily Claude Code sessions and generate learning reports')
   .version('0.1.0')
   .option('--date <date>', 'Target date or range (e.g. today, 2026-03-14, 2026-03-10:2026-03-14)', 'today')
-  .option('--format <format>', 'Output format: html | md', 'html')
+  .option('--format <format>', 'Output format: html | md')
   .option('--output <dir>', 'Output directory')
   .option('--dry-run', 'Preview mode: show sessions without calling LLM')
   .option('--no-cache', 'Skip cache for analysis (still writes cache)')
@@ -70,18 +71,23 @@ program
       const report = await reduceAnalyses(mapResults, config);
 
       // Render
+      const format = resolveFormat(opts.format || config.format);
       const outputDir = opts.output || config.outputDir;
       mkdirSync(outputDir.replace('~', process.env.HOME || ''), { recursive: true });
 
       const resolvedDir = outputDir.replace('~', process.env.HOME || '');
-      const fileName = `${formatDateForFilename(opts.date, dateRange)}.html`;
+      const fileName = `${formatDateForFilename(opts.date, dateRange)}.${format}`;
       const outputPath = path.join(resolvedDir, fileName);
 
-      const html = renderHTML(report, dateStr);
-      writeFileSync(outputPath, html, 'utf-8');
+      const output = format === 'md'
+        ? renderMarkdown(report, dateStr)
+        : renderHTML(report, dateStr);
+      writeFileSync(outputPath, output, 'utf-8');
 
       log.success(`Report saved to ${outputPath}`);
-      openInBrowser(outputPath);
+      if (format === 'html') {
+        openInBrowser(outputPath);
+      }
     } catch (e) {
       log.error(String(e));
       process.exit(1);
@@ -136,6 +142,11 @@ function formatSize(bytes: number): string {
   if (bytes >= 1_048_576) return `${(bytes / 1_048_576).toFixed(1)} MB`;
   if (bytes >= 1024) return `${(bytes / 1024).toFixed(0)} KB`;
   return `${bytes} B`;
+}
+
+function resolveFormat(value: string): 'html' | 'md' {
+  if (value === 'html' || value === 'md') return value;
+  throw new Error(`Unsupported format: ${value}. Expected "html" or "md".`);
 }
 
 async function printDryRun(
