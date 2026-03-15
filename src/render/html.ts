@@ -1,12 +1,12 @@
-import type { Report } from '../types.js';
+import type { Report } from "../types.js";
 
 function esc(str: string): string {
   return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 function md(str: string): string {
@@ -15,54 +15,35 @@ function md(str: string): string {
   let lastIndex = 0;
   let match;
   while ((match = codeBlockRegex.exec(str)) !== null) {
-    if (match.index > lastIndex) parts.push(inlineMd(str.slice(lastIndex, match.index)));
+    if (match.index > lastIndex)
+      parts.push(inlineMd(str.slice(lastIndex, match.index)));
     parts.push(`<pre><code>${esc(match[2].trim())}</code></pre>`);
     lastIndex = match.index + match[0].length;
   }
   if (lastIndex < str.length) parts.push(inlineMd(str.slice(lastIndex)));
-  return parts.join('');
+  return parts.join("");
 }
 
 function inlineMd(str: string): string {
   let result = esc(str);
-  result = result.replace(/`([^`]+)`/g, '<code>$1</code>');
-  result = result.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-  result = result.replace(/^(\d+)\.\s+(.+)$/gm, '<li>$2</li>');
-  result = result.replace(/((?:<li>.*<\/li>\n?)+)/g, '<ol>$1</ol>');
-  result = result.replace(/\n(?!<)/g, '<br>\n');
+  result = result.replace(/`([^`]+)`/g, "<code>$1</code>");
+  result = result.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+  result = result.replace(/^(\d+)\.\s+(.+)$/gm, "<li>$2</li>");
+  result = result.replace(/((?:<li>.*<\/li>\n?)+)/g, "<ol>$1</ol>");
+  result = result.replace(/\n(?!<)/g, "<br>\n");
   return result;
 }
 
-function categoryInitial(category: string): string {
-  const c = category.trim();
-  // Try to get a meaningful letter
-  if (/^[a-zA-Z]/.test(c)) return c[0].toUpperCase();
-  // For CJK, use first char
-  return c[0] || '?';
-}
-
-const CATEGORY_COLORS: [string[], string][] = [
-  [['语言', 'language', 'typescript', 'ts', 'js', 'python', 'rust', 'go'], '#3b82f6'],
-  [['框架', 'framework', 'react', 'vue', 'electron', 'next', 'node'], '#a855f7'],
-  [['模式', 'pattern', '设计'], '#ec4899'],
-  [['工具', 'tool', 'cli', 'git', 'docker', '工作流', 'workflow'], '#f59e0b'],
-  [['算法', 'algorithm', 'data structure'], '#10b981'],
-  [['devops', 'ci', 'cd', 'deploy', '部署', '运维'], '#6366f1'],
-  [['架构', 'architecture', 'system', 'ipc', 'api'], '#ef4444'],
-  [['测试', 'test', 'jest', 'vitest'], '#14b8a6'],
-  [['性能', 'performance', 'optim', '优化', '缓存', 'cache'], '#f97316'],
-  [['实践', 'practice', '最佳', 'best', '工程', 'engineering'], '#a855f7'],
+const COLOR_PALETTE = [
+  "#3b82f6", "#a855f7", "#ec4899", "#f59e0b", "#10b981",
+  "#6366f1", "#ef4444", "#14b8a6", "#f97316", "#8b5cf6",
 ];
 
 function categoryColor(category: string): string {
-  const lower = category.toLowerCase();
-  for (const [keys, color] of CATEGORY_COLORS) {
-    if (keys.some((k) => lower.includes(k))) return color;
-  }
   let hash = 0;
-  for (let i = 0; i < category.length; i++) hash = category.charCodeAt(i) + ((hash << 5) - hash);
-  const palette = ['#3b82f6', '#a855f7', '#ec4899', '#f59e0b', '#10b981', '#ef4444', '#14b8a6', '#f97316'];
-  return palette[Math.abs(hash) % palette.length];
+  for (let i = 0; i < category.length; i++)
+    hash = category.charCodeAt(i) + ((hash << 5) - hash);
+  return COLOR_PALETTE[Math.abs(hash) % COLOR_PALETTE.length];
 }
 
 export function renderHTML(report: Report, dateStr: string): string {
@@ -78,30 +59,32 @@ export function renderHTML(report: Report, dateStr: string): string {
         </div>
         <div class="nb-item-title">${esc(card.title)}</div>
         <div class="nb-item-body">${md(card.explanation)}</div>
-        ${card.tags.length ? `<div class="nb-item-tags">${card.tags.map((t) => `<span class="nb-tag">${esc(t)}</span>`).join('')}</div>` : ''}
+        ${card.tags.length ? `<div class="nb-item-tags">${card.tags.map((t) => `<span class="nb-tag">${esc(t)}</span>`).join("")}</div>` : ""}
         <div class="nb-item-scenarios">${md(card.applicableScenarios)}</div>
       </div>`,
     )
-    .join('\n');
+    .join("\n");
 
   const categoryTabs = categories
-    .map((cat) => `<div class="nb-tab" data-filter="${esc(cat)}">${esc(cat)}</div>`)
-    .join('\n');
-
+    .map(
+      (cat) =>
+        `<div class="nb-tab" data-filter="${esc(cat)}">${esc(cat)}</div>`,
+    )
+    .join("\n");
 
   const tips = report.practicalTips
     .map(
       (tip, i) => `
       <div class="tip-item">
-        <div class="tip-num">${String(i + 1).padStart(2, '0')}</div>
+        <div class="tip-num">${String(i + 1).padStart(2, "0")}</div>
         <div class="tip-content">
           <p class="tip-text">${md(tip.tip)}</p>
-          ${tip.snippet ? `<pre><code>${esc(tip.snippet)}</code></pre>` : ''}
-          ${tip.sourceProject ? `<span class="tip-source">${esc(tip.sourceProject)}</span>` : ''}
+          ${tip.snippet ? `<pre><code>${esc(tip.snippet)}</code></pre>` : ""}
+          ${tip.sourceProject ? `<span class="tip-source">${esc(tip.sourceProject)}</span>` : ""}
         </div>
       </div>`,
     )
-    .join('\n');
+    .join("\n");
 
   const problems = report.problemsAndSolutions
     .map(
@@ -120,28 +103,29 @@ export function renderHTML(report: Report, dateStr: string): string {
         </div>
       </details>`,
     )
-    .join('\n');
+    .join("\n");
 
   const sessionRows = report.overview.sessionSummaries
     .map(
       (s, i) =>
         `<div class="sess-row">
-          <div class="sess-num">${String(i + 1).padStart(2, '0')}</div>
+          <div class="sess-num">${String(i + 1).padStart(2, "0")}</div>
           <div class="sess-proj">${esc(s.project)}</div>
           <div class="sess-desc">${md(s.summary)}</div>
         </div>`,
     )
-    .join('\n');
+    .join("\n");
 
   const furtherLearning = report.furtherLearning
     .map(
-      (fl) => `<div class="fl-item"><strong>${esc(fl.topic)}</strong><span class="fl-reason">${md(fl.reason)}</span></div>`,
+      (fl) =>
+        `<div class="fl-item"><strong>${esc(fl.topic)}</strong><span class="fl-reason">${md(fl.reason)}</span></div>`,
     )
-    .join('\n');
+    .join("\n");
 
   const projectTags = report.overview.projectsInvolved
     .map((p) => `<span class="otag">${esc(p)}</span>`)
-    .join('');
+    .join("");
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -621,7 +605,9 @@ code {
     ${sessionRows}
   </div>
 
-  ${report.knowledgeCards.length ? `
+  ${
+    report.knowledgeCards.length
+      ? `
   <div class="section">
     <div class="section-header">
       <span class="section-title">Knowledge Points</span>
@@ -636,33 +622,47 @@ code {
         ${knowledgeNoteItems}
       </div>
     </div>
-  </div>` : ''}
+  </div>`
+      : ""
+  }
 
-  ${report.practicalTips.length ? `
+  ${
+    report.practicalTips.length
+      ? `
   <div class="section">
     <div class="section-header">
       <span class="section-title">Practical Tips</span>
       <span class="section-count">${report.practicalTips.length} tips</span>
     </div>
     ${tips}
-  </div>` : ''}
+  </div>`
+      : ""
+  }
 
-  ${report.problemsAndSolutions.length ? `
+  ${
+    report.problemsAndSolutions.length
+      ? `
   <div class="section">
     <div class="section-header">
       <span class="section-title">Problems &amp; Solutions</span>
       <span class="section-count">${report.problemsAndSolutions.length} items</span>
     </div>
     ${problems}
-  </div>` : ''}
+  </div>`
+      : ""
+  }
 
-  ${report.furtherLearning.length ? `
+  ${
+    report.furtherLearning.length
+      ? `
   <div class="section">
     <div class="section-header">
       <span class="section-title">Further Learning</span>
     </div>
     ${furtherLearning}
-  </div>` : ''}
+  </div>`
+      : ""
+  }
 </div>
 
 <div class="foot">Generated by OpenRecap</div>

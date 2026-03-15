@@ -69,18 +69,7 @@ export const sessionAnalysisSchema = z.object({
   knowledgePoints: z.array(
     z.object({
       title: z.string(),
-      category: z.enum([
-        'language-feature',
-        'framework',
-        'design-pattern',
-        'tool',
-        'algorithm',
-        'devops',
-        'architecture',
-        'testing',
-        'performance',
-        'other',
-      ]),
+      category: z.string(),
       explanation: z.string(),
       applicableScenarios: z.string(),
     }),
