@@ -79,20 +79,23 @@ Generate options:
 
 OpenRecap supports two providers:
 
-**AWS Bedrock**
-- AWS Region (default: `us-east-1`)
-- AWS Bearer Token (`AWS_BEARER_TOKEN_BEDROCK`) — or standard AWS credential chain
+**OpenAI-compatible APIs** (recommended)
 
-**OpenAI-compatible APIs**
 - Base URL (default: `https://api.openai.com/v1`)
 - API Key — optional for self-hosted endpoints
-- Model ID — provider-specific (e.g. `gpt-4.1-mini`)
+- Model ID — e.g. `gpt-5.4`,
+
+**AWS Bedrock**
+
+- AWS Region (default: `us-east-1`)
+- AWS Bearer Token (`AWS_BEARER_TOKEN_BEDROCK`) — or standard AWS credential chain
 
 ## Privacy
 
 Session data is sent to your configured LLM provider for analysis.
 
 Safeguards:
+
 - Explicit consent prompt during setup
 - Best-effort secret redaction before any LLM call
 - Reports and cache stored locally only (`~/.openrecap/`)

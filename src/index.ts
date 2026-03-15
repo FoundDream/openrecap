@@ -108,7 +108,11 @@ program
       mkdirSync(outputDir.replace('~', process.env.HOME || ''), { recursive: true });
 
       const resolvedDir = outputDir.replace('~', process.env.HOME || '');
-      const fileName = `${formatDateForFilename(opts.date, dateRange)}.${format}`;
+      const datePart = formatDateForFilename(opts.date, dateRange);
+      const sessionSuffix = opts.sessions
+        ? '_' + sessions.map((s) => s.sessionId.slice(0, 6)).join('_')
+        : '';
+      const fileName = `${datePart}${sessionSuffix}.${format}`;
       const outputPath = path.join(resolvedDir, fileName);
 
       const output = format === 'md'
