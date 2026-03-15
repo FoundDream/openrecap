@@ -8,6 +8,15 @@ import { log } from '../utils/logger.js';
 const CLAUDE_PROJECTS_DIR = path.join(homedir(), '.claude', 'projects');
 
 /**
+ * Validate that a constructed Date matches the input parts (catches overflow like month 13).
+ */
+function assertValidDate(d: Date, parts: number[], input: string): void {
+  if (isNaN(d.getTime()) || d.getFullYear() !== parts[0] || d.getMonth() !== parts[1] - 1 || d.getDate() !== parts[2]) {
+    throw new Error(`Invalid date: "${input}". Expected format: YYYY-MM-DD`);
+  }
+}
+
+/**
  * Parse a date option string into a start/end Date range (local timezone, inclusive).
  *
  * Supported formats:
@@ -27,15 +36,17 @@ export function parseDateOption(dateStr: string): { start: Date; end: Date } {
     const [startStr, endStr] = dateStr.split(':');
     const startParts = startStr.split('-').map(Number);
     const endParts = endStr.split('-').map(Number);
-    return {
-      start: new Date(startParts[0], startParts[1] - 1, startParts[2], 0, 0, 0, 0),
-      end: new Date(endParts[0], endParts[1] - 1, endParts[2], 23, 59, 59, 999),
-    };
+    const start = new Date(startParts[0], startParts[1] - 1, startParts[2], 0, 0, 0, 0);
+    const end = new Date(endParts[0], endParts[1] - 1, endParts[2], 23, 59, 59, 999);
+    assertValidDate(start, startParts, startStr);
+    assertValidDate(end, endParts, endStr);
+    return { start, end };
   }
 
   const parts = dateStr.split('-').map(Number);
   const start = new Date(parts[0], parts[1] - 1, parts[2], 0, 0, 0, 0);
   const end = new Date(parts[0], parts[1] - 1, parts[2], 23, 59, 59, 999);
+  assertValidDate(start, parts, dateStr);
   return { start, end };
 }
 
