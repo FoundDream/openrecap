@@ -5,11 +5,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
+bun install          # Install dependencies (always use bun, not npm/yarn)
 npm run build        # Build with tsup (output: dist/)
 npm run dev          # Build in watch mode
 bun test             # Run all tests
 bun test <file>      # Run a single test file
 npx tsc --noEmit     # Type-check without emitting
+npm run lint         # Lint and format check (Biome)
+npm run lint:fix     # Auto-fix lint and format issues
 ```
 
 ## Architecture
@@ -40,7 +43,9 @@ Discover → Parse (DAG) → Compress → Sanitize → Map (LLM) → Reduce (LLM
 
 ## Conventions
 
+- **Use bun for dependencies**: Always use `bun install` / `bun add` to manage packages, not npm or yarn.
+- **No hardcoded config**: All user-configurable values come from `~/.openrecap/config.json`. Never hardcode provider settings, model IDs, or paths.
 - **ESM only**: All imports use `.js` extensions (Node16 module resolution).
 - **Zod schemas as source of truth**: Types in `types.ts` are inferred from Zod schemas (`z.infer<typeof schema>`), shared between LLM structured output and internal logic.
-- **No hardcoded config**: All user-configurable values come from `~/.openrecap/config.json`. Never hardcode provider settings, model IDs, or paths.
+- **Biome for linting/formatting**: Run `npm run lint:fix` before committing. Template files (`src/render/template/`) are excluded from Biome.
 - **Output filenames**: `{date}.{format}` for full reports, `{date}_{sessionId6chars}.{format}` when `--sessions` is specified.
