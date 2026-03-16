@@ -9,6 +9,7 @@ import { getCached } from "./cache/cache.js";
 import { configExists, loadConfig, runSetup } from "./config.js";
 import { renderHTML } from "./render/html.js";
 import { renderMarkdown } from "./render/markdown.js";
+import { enrichReport } from "./search/enrich.js";
 import { discoverSessions, parseDateOption } from "./session/discover.js";
 import type { Config, DiscoveredSession } from "./types.js";
 import { log, spinner } from "./utils/logger.js";
@@ -185,7 +186,10 @@ async function generateReport(opts: GenerateOptions): Promise<void> {
   }
 
   // Reduce phase
-  const report = await reduceAnalyses(mapResults, config);
+  let report = await reduceAnalyses(mapResults, config);
+
+  // Enrich with search results
+  report = await enrichReport(report, config.tavilyApiKey);
 
   // Render
   const format = resolveFormat(opts.format || config.format);

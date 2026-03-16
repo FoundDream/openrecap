@@ -135,6 +135,15 @@ export const reportSchema = z.object({
     z.object({
       topic: z.string(),
       reason: z.string(),
+      resources: z
+        .array(
+          z.object({
+            title: z.string(),
+            url: z.string(),
+            snippet: z.string(),
+          }),
+        )
+        .optional(),
     }),
   ),
 });
@@ -148,6 +157,7 @@ const baseConfigSchema = z.object({
   outputDir: z.string().min(1),
   format: z.enum(["html", "md"]),
   language: z.enum(["auto", "zh", "en"]),
+  tavilyApiKey: z.string().optional(),
 });
 
 const bedrockConfigSchema = baseConfigSchema.extend({

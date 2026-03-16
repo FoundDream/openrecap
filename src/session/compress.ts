@@ -2,7 +2,7 @@ import type { ContentBlock, ParsedMessage } from "../types.js";
 import { estimateTokens } from "../utils/tokens.js";
 
 const MAX_TOKENS_PER_CHUNK = 30_000;
-const MAX_TEXT_LENGTH = 2000;
+const MAX_TEXT_LENGTH = 6000;
 const TEXT_TAIL_LENGTH = 200;
 const TOOL_INPUT_MAX = 200;
 const TOOL_RESULT_MAX = 500;

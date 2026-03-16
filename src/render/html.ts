@@ -226,13 +226,26 @@ function buildProblemsSection(
   </div>`;
 }
 
+function buildResourceLinks(
+  resources?: { title: string; url: string; snippet: string }[],
+): string {
+  if (!resources || resources.length === 0) return "";
+  const links = resources
+    .map(
+      (r) =>
+        `<a class="resource-link" href="${esc(r.url)}" target="_blank" rel="noopener"><span class="resource-title">${esc(r.title)}</span><span class="resource-snippet">${esc(r.snippet)}</span></a>`,
+    )
+    .join("\n");
+  return `<div class="resource-list">${links}</div>`;
+}
+
 function buildFurtherLearningSection(items: Report["furtherLearning"]): string {
   if (items.length === 0) return "";
 
   const list = items
     .map(
       (fl) =>
-        `<div class="fl-item"><strong>${esc(fl.topic)}</strong><span class="fl-reason">${md(fl.reason)}</span></div>`,
+        `<div class="fl-item"><strong>${esc(fl.topic)}</strong><span class="fl-reason">${md(fl.reason)}</span>${buildResourceLinks(fl.resources)}</div>`,
     )
     .join("\n");
 

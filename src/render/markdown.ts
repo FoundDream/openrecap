@@ -105,16 +105,21 @@ export function renderMarkdown(report: Report, dateStr: string): string {
 
   // Further Learning
   if (report.furtherLearning.length > 0) {
-    sections.push(
-      section(
-        "Further Learning",
-        list(
-          report.furtherLearning.map(
-            (item) => `**${item.topic}**: ${item.reason}`,
-          ),
-        ),
-      ),
-    );
+    const items = report.furtherLearning
+      .map((item) => {
+        const parts = [`### ${item.topic}`, "", item.reason];
+        if (item.resources && item.resources.length > 0) {
+          parts.push(
+            "",
+            item.resources
+              .map((r) => `- [${r.title}](${r.url}) — ${r.snippet}`)
+              .join("\n"),
+          );
+        }
+        return parts.join("\n");
+      })
+      .join("\n\n");
+    sections.push(section("Further Learning", items));
   }
 
   return sections.join("\n");

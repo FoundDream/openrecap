@@ -472,6 +472,37 @@ html.light .notebook {
   font-size: 0.85rem;
   margin-top: 0.2rem;
 }
+.resource-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+.resource-link {
+  display: block;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s;
+}
+.resource-link:hover {
+  border-color: var(--accent);
+}
+.resource-title {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--accent);
+}
+.resource-snippet {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text2);
+  margin-top: 0.15rem;
+  line-height: 1.4;
+}
 
 /* ─── CODE ─── */
 pre {
